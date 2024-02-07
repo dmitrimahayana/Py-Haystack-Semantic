@@ -22,7 +22,7 @@ vectorizer = TfidfVectorizer()
 tfidf_matrix = vectorizer.fit_transform(df['text'])
 
 # Transform the keyword "fatigue" using the same TF-IDF vectorizer
-keyword_vector = vectorizer.transform(['fatigue'])
+keyword_vector = vectorizer.transform(['fattigue'])
 
 # Calculate cosine similarity
 cosine_similarities = cosine_similarity(keyword_vector, tfidf_matrix).flatten()
@@ -35,4 +35,4 @@ top_indices = cosine_similarities.argsort()[-N:][::-1]
 for index in top_indices:
     print(
         f"ID: {df['id'][index]}, URL: {df['url'][index]}, Title: {df['title'][index]}, Desc: {df['desc'][index]}, Location: {df['location'][index]}")
-    print("-------------")
+print("Done...")

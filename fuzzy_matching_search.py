@@ -24,5 +24,5 @@ matches = process.extract("fatigue", df['text'], limit=N)
 # Display the results
 for match, score, index in matches:
     print(
-        f"Score: {score}, ID: {df['id'][index]}, URL: {df['url'][index]}, Title: {df['title'][index]}, Desc: {df['desc'][index]}, Location: {df['location'][index]}")
-    print("-------------")
+        f"ID: {df['id'][index]}, URL: {df['url'][index]}, Title: {df['title'][index]}, Desc: {df['desc'][index]}, Location: {df['location'][index]}")
+print("Done...")

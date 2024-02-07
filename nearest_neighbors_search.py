@@ -83,5 +83,5 @@ distances, indices = nn_model.kneighbors(keyword_vector)
 for i, index in enumerate(indices.flatten()):
     similarity_score = 1 - distances.flatten()[i]  # Convert cosine distance to similarity/
     print(
-        f"Score:{similarity_score}, ID: {df['id'][index]}, URL: {df['url'][index]}, Title: {df['title'][index]}, Desc: {df['desc'][index]}, Location: {df['location'][index]}")
-    print("-------------")
+        f"ID: {df['id'][index]}, URL: {df['url'][index]}, Title: {df['title'][index]}, Desc: {df['desc'][index]}, Location: {df['location'][index]}")
+print("Done...")
