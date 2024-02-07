@@ -49,6 +49,7 @@ document_store = FAISSDocumentStore(
 
 query_pipeline = Pipeline()
 query_pipeline.add_node(component=retriever, name="Retriever", inputs=["Query"])
+# query_pipeline.add_node(component=prompt_node, name="PromptNode", inputs=["Retriever"])
 results = query_pipeline.run(query="fatigue", params={"Retriever": {"top_k": 3}})
 for row in results['documents']:
     print(f"ID: {row.id}, Content: {row.content}")
