@@ -3,7 +3,6 @@ from fuzzywuzzy import process
 from fuzzywuzzy import fuzz
 from sklearn.model_selection import GridSearchCV
 
-
 # Sample DataFrame
 data = {
     'id': [1, 2, 3, 4, 5],
@@ -19,10 +18,11 @@ df = pd.DataFrame(data)
 df['text'] = df['title'] + ' ' + df['desc']
 
 # Find the closest matches to the keyword "fatigue"
-N = 5
+N = 3
 matches = process.extract("fatigue", df['text'], limit=N)
 
 # Display the results
 for match, score, index in matches:
-    print(f"Score: {score}, ID: {df['id'][index]}, URL: {df['url'][index]}, Title: {df['title'][index]}, Desc: {df['desc'][index]}, Location: {df['location'][index]}")
+    print(
+        f"Score: {score}, ID: {df['id'][index]}, URL: {df['url'][index]}, Title: {df['title'][index]}, Desc: {df['desc'][index]}, Location: {df['location'][index]}")
     print("-------------")
