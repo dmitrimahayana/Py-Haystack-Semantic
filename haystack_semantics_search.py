@@ -21,10 +21,6 @@ document_store = FAISSDocumentStore(sql_url=f"sqlite:///{db_path}")
 retriever = EmbeddingRetriever(document_store=document_store,
                                embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1")
 
-# prompt_node = PromptNode(model_name_or_path="gpt-4",
-#                          api_key=os.environ.get('CHATGPT_API_KEY'),
-#                          default_prompt_template="deepset/question-answering-with-references")
-
 # Sample DataFrame
 data = {
     'id': [1, 2, 3, 4, 5],
@@ -49,7 +45,6 @@ document_store = FAISSDocumentStore(
 
 query_pipeline = Pipeline()
 query_pipeline.add_node(component=retriever, name="Retriever", inputs=["Query"])
-# query_pipeline.add_node(component=prompt_node, name="PromptNode", inputs=["Retriever"])
 results = query_pipeline.run(query="fatigue", params={"Retriever": {"top_k": 3}})
 for row in results['documents']:
     print(f"ID: {row.id}, Content: {row.content}")
