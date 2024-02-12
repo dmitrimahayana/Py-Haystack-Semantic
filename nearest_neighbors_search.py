@@ -11,15 +11,19 @@ from sklearn.pipeline import Pipeline
 data = {
     'id': [1, 2, 3, 4, 5],
     'url': ['url1', 'url2', 'url3', 'url4', 'url5'],
-    'title': ['title1', 'title2', 'title3', 'title4', 'title5'],
-    'desc': ['description1 fatigue', 'description2', 'fatigue description3', 'description4', 'no fatigue'],
+    'title': ['apar', 'cek fatigue', 'microsleep', 'check fatigue', 'lingkungan berdebu'],
+    'description': ['Apar Low Pressure unit CO2470',
+                    'pemeriksaan kebugaran dan keamanan unit',
+                    'microsleep fatigue',
+                    'management fatigue',
+                    'jalan hauling berdebu'],
     'location': ['loc1', 'loc2', 'loc3', 'loc4', 'loc5']
 }
 
 df = pd.DataFrame(data)
 
 # Combine relevant text columns into a single column for vectorization
-df['text'] = df['title'] + ' ' + df['desc']
+df['text'] = df['title'] + ' ' + df['description']
 
 # # Define a range of hyperparameters
 # max_df_options = [0.75, 0.85, 1.0]  # Increased upper range
@@ -74,7 +78,7 @@ nn_model = NearestNeighbors(n_neighbors=N, algorithm='auto')
 nn_model.fit(tfidf_matrix)
 
 # Transform the keyword "fatigue" using the same TF-IDF vectorizer
-keyword_vector = vectorizer.transform(['fatigue'])
+keyword_vector = vectorizer.transform(['fatigguee'])
 
 # Find nearest neighbors for the keyword vector
 distances, indices = nn_model.kneighbors(keyword_vector)
@@ -83,5 +87,5 @@ distances, indices = nn_model.kneighbors(keyword_vector)
 for i, index in enumerate(indices.flatten()):
     similarity_score = 1 - distances.flatten()[i]  # Convert cosine distance to similarity/
     print(
-        f"ID: {df['id'][index]}, URL: {df['url'][index]}, Title: {df['title'][index]}, Desc: {df['desc'][index]}, Location: {df['location'][index]}")
+        f"ID: {df['id'][index]}, URL: {df['url'][index]}, Title: {df['title'][index]}, Desc: {df['description'][index]}, Location: {df['location'][index]}")
 print("Done...")

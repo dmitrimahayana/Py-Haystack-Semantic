@@ -1,5 +1,6 @@
 farm-haystack -f https://download.pytorch.org/whl/torch_stable.html
 farm-haystack[faiss]
+farm-haystack[mongodb]
 sentence-transformers
 pyarrow
 fuzzywuzzy
