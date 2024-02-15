@@ -1,1 +1,0 @@
-{"sql_url": "sqlite:///faiss/faiss_dataframe_document_store.db", "embedding_dim": 1536, "faiss_index_factory_str": "Flat"}
