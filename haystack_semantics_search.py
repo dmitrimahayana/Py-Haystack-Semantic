@@ -105,7 +105,6 @@ def perform_query(query_string, N, type):
     # Perform Query
     top_k_retriever = N
     top_k_reader = N
-
     results = query_pipeline.run(query=query_string,
                                  params={
                                      "Retriever": {"top_k": top_k_retriever},
