@@ -12,6 +12,7 @@ import ast
 # Define env variable
 load_dotenv(".env")
 
+# Define constants variable
 FAISS_DB_PATH = os.getenv('faiss_db_path')
 FAISS_INDEX_PATH = os.getenv('faiss_index_path')
 FAISS_CONFIG_PATH = os.getenv('faiss_config_path')
@@ -24,6 +25,17 @@ ES_USERNAME = os.getenv('es_username')
 ES_PASSWORD = os.getenv('es_password')
 ES_EMBEDDING_DIM = os.getenv('es_embedding_dim')
 ES_PREFIX_INDEX = os.getenv('es_prefix_index')
+
+# Define ES document store
+document_store = ElasticsearchDocumentStore(host=ES_HOST,
+                                            port=ES_PORT,
+                                            scheme=ES_SCHEME,
+                                            verify_certs=ast.literal_eval(ES_VERIFY_CERTS),
+                                            ca_certs=ES_CA_CERTS,
+                                            username=ES_USERNAME,
+                                            password=ES_PASSWORD,
+                                            embedding_dim=int(ES_EMBEDDING_DIM),
+                                            index=ES_PREFIX_INDEX + '_fb_' + ES_EMBEDDING_DIM)
 
 
 def create_index(documents):
@@ -38,15 +50,6 @@ def create_index(documents):
     # document_store = FAISSDocumentStore(sql_url=f"sqlite:///{FAISS_DB_PATH}",
     #                                     embedding_dim=768,  # 768 OR 1536
     #                                     faiss_index_factory_str="Flat")
-    document_store = ElasticsearchDocumentStore(host=ES_HOST,
-                                                port=ES_PORT,
-                                                scheme=ES_SCHEME,
-                                                verify_certs=ast.literal_eval(ES_VERIFY_CERTS),
-                                                ca_certs=ES_CA_CERTS,
-                                                username=ES_USERNAME,
-                                                password=ES_PASSWORD,
-                                                embedding_dim=int(ES_EMBEDDING_DIM),
-                                                index=ES_PREFIX_INDEX+'_fb_'+ES_EMBEDDING_DIM)
 
     # Define Retriever
     # retriever = EmbeddingRetriever(document_store=document_store,
@@ -66,16 +69,7 @@ def create_index(documents):
 def perform_query(query_string, N):
     # Reload Document Store
     # document_store = FAISSDocumentStore(faiss_index_path=FAISS_INDEX_PATH,
-    #                                     faiss_config_path=FAISS_CONFIG_PATH)
-    document_store = ElasticsearchDocumentStore(host=ES_HOST,
-                                                port=ES_PORT,
-                                                scheme=ES_SCHEME,
-                                                verify_certs=ast.literal_eval(ES_VERIFY_CERTS),
-                                                ca_certs=ES_CA_CERTS,
-                                                username=ES_USERNAME,
-                                                password=ES_PASSWORD,
-                                                embedding_dim=int(ES_EMBEDDING_DIM),
-                                                index=ES_PREFIX_INDEX+'_fb_'+ES_EMBEDDING_DIM)
+    #                                     faiss_config_path=FAISS_CONFIG_PATH)\
 
     # Define Retriever
     # retriever = EmbeddingRetriever(document_store=document_store,
@@ -109,16 +103,7 @@ def perform_query(query_string, N):
 def update_index(dict_faiss_config, documents):
     # Reload Document Store
     # document_store = FAISSDocumentStore(faiss_index_path=FAISS_INDEX_PATH,
-    #                                     faiss_config_path=FAISS_CONFIG_PATH)
-    document_store = ElasticsearchDocumentStore(host=ES_HOST,
-                                                port=ES_PORT,
-                                                scheme=ES_SCHEME,
-                                                verify_certs=ast.literal_eval(ES_VERIFY_CERTS),
-                                                ca_certs=ES_CA_CERTS,
-                                                username=ES_USERNAME,
-                                                password=ES_PASSWORD,
-                                                embedding_dim=int(ES_EMBEDDING_DIM),
-                                                index=ES_PREFIX_INDEX+'_fb_'+ES_EMBEDDING_DIM)
+    #                                     faiss_config_path=FAISS_CONFIG_PATH)\
 
     # Define Retriever
     # retriever = EmbeddingRetriever(document_store=document_store,
