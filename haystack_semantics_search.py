@@ -123,7 +123,7 @@ if __name__ == "__main__":
     documents = df[['Number', 'content']].to_dict(orient='records')
 
     # Define Index Name
-    index_name = 'digimon'
+    index_name = 'digimon_v1'
 
     # Perform Indexing
     create_index(documents, index_name)
