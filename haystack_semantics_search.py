@@ -108,11 +108,7 @@ def perform_query(query_string, N, type):
     top_k_reader = N
 
     results = query_pipeline.run(query=query_string,
-                                 params=
-                                 {"Retriever": {"top_k": top_k_retriever},
-                                  "Ranker": {"top_k": top_k_ranker},
-                                  "Reader": {"top_k": top_k_reader}
-                                  })
+                                 params={"Reader": {"top_k": top_k_reader}})
     print("Query:", query_string)
     for row in results['documents']:
         print(f"ID: {row.id}, Content: {row.content[:100]}, Score: {row.score}")
@@ -159,4 +155,4 @@ if __name__ == "__main__":
     create_index(documents, 'digimon')
 
     # Perform Searching
-    perform_query('Show me the list Digimon type Mega-Virus', 3, 'digimon')
+    perform_query('Show me the list powerful virus type digimon', 5, 'digimon')
