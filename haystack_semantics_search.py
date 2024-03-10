@@ -53,7 +53,7 @@ def create_index(documents, type):
 
     # Define Retriever
     # retriever = EmbeddingRetriever(document_store=document_store,
-    #                                embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1")
+    #                                embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1") # multi-qa-mpnet-base-dot-v1 or all-mpnet-base-v2
     retriever = DensePassageRetriever(
         document_store=document_store,
         query_embedding_model="facebook/dpr-question_encoder-single-nq-base",
@@ -83,7 +83,7 @@ def perform_query(query_string, N, type):
 
     # Define Retriever
     # retriever = EmbeddingRetriever(document_store=document_store,
-    #                                embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1")
+    #                                embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1") # multi-qa-mpnet-base-dot-v1 or all-mpnet-base-v2
     retriever = DensePassageRetriever(
         document_store=document_store,
         query_embedding_model="facebook/dpr-question_encoder-single-nq-base",
@@ -104,45 +104,17 @@ def perform_query(query_string, N, type):
 
     # Perform Query
     top_k_retriever = N
-    top_k_ranker = N
     top_k_reader = N
 
     results = query_pipeline.run(query=query_string,
-                                 params={"Reader": {"top_k": top_k_reader}})
+                                 params={
+                                     "Retriever": {"top_k": top_k_retriever},
+                                     "Reader": {"top_k": top_k_reader}
+                                 })
     print("Query:", query_string)
     for row in results['documents']:
         print(f"ID: {row.id}, Content: {row.content[:100]}, Score: {row.score}")
     print("Done...")
-
-
-def update_index(documents, type):
-    # Reload Document Store
-    # document_store = FAISSDocumentStore(faiss_index_path=FAISS_INDEX_PATH,
-    #                                     faiss_config_path=FAISS_CONFIG_PATH)
-    # Define ES document store
-    document_store = ElasticsearchDocumentStore(host=ES_HOST,
-                                                port=ES_PORT,
-                                                scheme=ES_SCHEME,
-                                                verify_certs=ast.literal_eval(ES_VERIFY_CERTS),
-                                                ca_certs=ES_CA_CERTS,
-                                                username=ES_USERNAME,
-                                                password=ES_PASSWORD,
-                                                embedding_dim=int(ES_EMBEDDING_DIM),
-                                                index=ES_PREFIX_INDEX + type + ES_EMBEDDING_DIM)
-
-    # Define Retriever
-    # retriever = EmbeddingRetriever(document_store=document_store,
-    #                                embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1")
-    retriever = DensePassageRetriever(
-        document_store=document_store,
-        query_embedding_model="facebook/dpr-question_encoder-single-nq-base",
-        passage_embedding_model="facebook/dpr-ctx_encoder-single-nq-base"
-    )
-
-    # Update Doc Embedding
-    document_store.write_documents(documents)
-    document_store.update_embeddings(retriever)
-    # document_store.save(FAISS_INDEX_PATH)
 
 
 if __name__ == "__main__":
@@ -151,8 +123,11 @@ if __name__ == "__main__":
     df['content'] = df.apply(lambda row: ', '.join([f"{index} {value}" for index, value in row.items()]), axis=1)
     documents = df[['Number', 'content']].to_dict(orient='records')
 
+    # Define Index Name
+    index_name = 'digimon'
+
     # Perform Indexing
-    create_index(documents, 'digimon')
+    create_index(documents, index_name)
 
     # Perform Searching
-    perform_query('Show me the list powerful virus type digimon', 5, 'digimon')
+    perform_query('Garurumon', 5, index_name)
