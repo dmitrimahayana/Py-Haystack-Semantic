@@ -1,7 +1,9 @@
-farm-haystack -f https://download.pytorch.org/whl/torch_stable.html
-farm-haystack[faiss]
-farm-haystack[mongodb]
-sentence-transformers
-pyarrow
-fuzzywuzzy
-python-Levenshtein
+farm-haystack==1.24.1 -f https://download.pytorch.org/whl/torch_stable.html
+farm-haystack[faiss]==1.24.1
+farm-haystack[elasticsearch]==1.24.1
+sentence-transformers==2.3.1
+pandas==2.2.0
+Pyarrow==15.0.0
+python-dotenv==1.0.1
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.25.0
