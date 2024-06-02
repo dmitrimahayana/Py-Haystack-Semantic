@@ -4,8 +4,7 @@ from haystack.document_stores import ElasticsearchDocumentStore
 from haystack.nodes import EmbeddingRetriever
 from haystack.nodes import DensePassageRetriever
 from haystack.nodes import SentenceTransformersRanker
-from haystack.nodes import DocumentMerger
-from haystack.nodes import FARMReader
+from Metadata_Filter import MetadataFilter
 from dotenv import load_dotenv
 from haystack import Document
 import pandas as pd
@@ -80,7 +79,7 @@ def create_index(documents, type):
     print("Indexing Done...")
 
 
-def perform_query(query_string, N, type):
+def perform_query(query_string, N, filters, type):
     print("Retrieval Start...")
     # Define FAISS document Store
     document_store = load_faiss_doc_store(FAISS_DB_PATH, FAISS_INDEX_PATH, FAISS_CONFIG_PATH)
@@ -112,21 +111,19 @@ def perform_query(query_string, N, type):
     ranker = SentenceTransformersRanker(model_name_or_path=MS_MARCO_MODEL)
     # ranker = SentenceTransformersRanker(model_name_or_path="cross-encoder/ms-marco-MiniLM-L-12-v2")
 
-    # Define Reader
-    # reader = FARMReader(model_name_or_path="deepset/roberta-base-squad2", use_gpu=True)
-
     # Create Pipeline
     query_pipeline = Pipeline()
     query_pipeline.add_node(component=retriever2, name="Retriever", inputs=["Query"])
     query_pipeline.add_node(component=ranker, name="Ranker", inputs=["Retriever"])
-    # query_pipeline.add_node(component=reader, name="Reader", inputs=["Ranker"])
+    query_pipeline.add_node(component=MetadataFilter(), name="FilterMetadata", inputs=["Ranker"])
 
     # Perform Query
     top_k_result = N
     results = query_pipeline.run(query=query_string,
                                  params={
-                                     "Retriever": {"top_k": top_k_result},
-                                     "Ranker": {"top_k": top_k_result}
+                                     "Retriever": {"top_k": 200},
+                                     "Ranker": {"top_k": 200},
+                                     "FilterMetadata": {"filter": filters, "top_k": top_k_result},
                                  })
     print("Query:", query_string)
     for row in results['documents']:
@@ -155,7 +152,10 @@ if __name__ == "__main__":
     index_name = 'digimon'
 
     # Perform Indexing
-    create_index(documents_raw, index_name)
+    # create_index(documents_final, index_name)
 
     # Perform Searching
-    perform_query('Garurumon', 5, index_name)
+    filters = {
+        "attribute": "fire"
+    }
+    perform_query('greymon', 20, filters, index_name)
