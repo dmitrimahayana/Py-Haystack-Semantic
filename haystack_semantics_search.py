@@ -4,6 +4,7 @@ from haystack.document_stores import ElasticsearchDocumentStore
 from haystack.nodes import EmbeddingRetriever
 from haystack.nodes import DensePassageRetriever
 from haystack.nodes import SentenceTransformersRanker
+from haystack.nodes import DocumentMerger
 from haystack.nodes import FARMReader
 from dotenv import load_dotenv
 import pandas as pd
@@ -26,81 +27,93 @@ ES_USERNAME = os.getenv('es_username')
 ES_PASSWORD = os.getenv('es_password')
 ES_EMBEDDING_DIM = os.getenv('es_embedding_dim')
 ES_PREFIX_INDEX = os.getenv('es_prefix_index')
+MULTI_QA_MPNET_MODEL = os.getenv('multi_qa_mpnet_model')
+DPR_QUESTION_MODEL = os.getenv('dpr_question_model')
+DPR_CTX_MODEL = os.getenv('dpr_ctx_model')
+MS_MARCO_MODEL = os.getenv('ms_marco_model')
 
 
 def create_index(documents, type):
     # Delete Existing Faiss Store
-    # if os.path.exists(FAISS_DB_PATH):
-    #     os.remove(FAISS_DB_PATH)
-    # if os.path.exists(FAISS_INDEX_PATH):
-    #     os.remove(FAISS_INDEX_PATH)
-    # if os.path.exists(FAISS_CONFIG_PATH):
-    #     os.remove(FAISS_CONFIG_PATH)
-    # Create Store
-    # document_store = FAISSDocumentStore(sql_url=f"sqlite:///{FAISS_DB_PATH}",
-    #                                     embedding_dim=768,  # 768 OR 1536
-    #                                     faiss_index_factory_str="Flat")
+    if os.path.exists(FAISS_DB_PATH):
+        os.remove(FAISS_DB_PATH)
+    if os.path.exists(FAISS_INDEX_PATH):
+        os.remove(FAISS_INDEX_PATH)
+    if os.path.exists(FAISS_CONFIG_PATH):
+        os.remove(FAISS_CONFIG_PATH)
+    # Define FAISS document Store
+    document_store = FAISSDocumentStore(sql_url=f"sqlite:///{FAISS_DB_PATH}",
+                                        embedding_dim=768,  # 768 OR 1536
+                                        faiss_index_factory_str="Flat")
     # Define ES document store
-    document_store = ElasticsearchDocumentStore(host=ES_HOST,
-                                                port=ES_PORT,
-                                                scheme=ES_SCHEME,
-                                                verify_certs=ast.literal_eval(ES_VERIFY_CERTS),
-                                                ca_certs=ES_CA_CERTS,
-                                                username=ES_USERNAME,
-                                                password=ES_PASSWORD,
-                                                embedding_dim=int(ES_EMBEDDING_DIM),
-                                                index=ES_PREFIX_INDEX + type + ES_EMBEDDING_DIM)
+    # document_store = ElasticsearchDocumentStore(host=ES_HOST,
+    #                                             port=ES_PORT,
+    #                                             scheme=ES_SCHEME,
+    #                                             verify_certs=ast.literal_eval(ES_VERIFY_CERTS),
+    #                                             ca_certs=ES_CA_CERTS,
+    #                                             username=ES_USERNAME,
+    #                                             password=ES_PASSWORD,
+    #                                             embedding_dim=int(ES_EMBEDDING_DIM),
+    #                                             index=ES_PREFIX_INDEX + type + ES_EMBEDDING_DIM)
 
     # Define Retriever
-    # retriever = EmbeddingRetriever(document_store=document_store,
-    #                                embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1") # multi-qa-mpnet-base-dot-v1 or all-mpnet-base-v2
-    retriever = DensePassageRetriever(
+    retriever1 = EmbeddingRetriever(document_store=document_store,
+                                    embedding_model=MULTI_QA_MPNET_MODEL)  # multi-qa-mpnet-base-dot-v1 or all-mpnet-base-v2
+                                    # embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1")  # multi-qa-mpnet-base-dot-v1 or all-mpnet-base-v2
+    retriever2 = DensePassageRetriever(
         document_store=document_store,
-        query_embedding_model="facebook/dpr-question_encoder-single-nq-base",
-        passage_embedding_model="facebook/dpr-ctx_encoder-single-nq-base"
+        query_embedding_model=DPR_QUESTION_MODEL,
+        passage_embedding_model=DPR_CTX_MODEL
+        # query_embedding_model="facebook/dpr-question_encoder-single-nq-base",
+        # passage_embedding_model="facebook/dpr-ctx_encoder-single-nq-base"
     )
 
     # Update Doc Embedding
     document_store.write_documents(documents)
-    document_store.update_embeddings(retriever)
-    # document_store.save(FAISS_INDEX_PATH)
+    document_store.update_embeddings(retriever2)
+    document_store.save(FAISS_INDEX_PATH)  # Fais Doc Store
 
 
 def perform_query(query_string, N, type):
-    # Reload Document Store
-    # document_store = FAISSDocumentStore(faiss_index_path=FAISS_INDEX_PATH,
-    #                                     faiss_config_path=FAISS_CONFIG_PATH)\
+    # Define FAISS document Store
+    document_store = FAISSDocumentStore.load(index_path=FAISS_INDEX_PATH,
+                                             config_path=FAISS_CONFIG_PATH)
+
     # Define ES document store
-    document_store = ElasticsearchDocumentStore(host=ES_HOST,
-                                                port=ES_PORT,
-                                                scheme=ES_SCHEME,
-                                                verify_certs=ast.literal_eval(ES_VERIFY_CERTS),
-                                                ca_certs=ES_CA_CERTS,
-                                                username=ES_USERNAME,
-                                                password=ES_PASSWORD,
-                                                embedding_dim=int(ES_EMBEDDING_DIM),
-                                                index=ES_PREFIX_INDEX + type + ES_EMBEDDING_DIM)
+    # document_store = ElasticsearchDocumentStore(host=ES_HOST,
+    #                                             port=ES_PORT,
+    #                                             scheme=ES_SCHEME,
+    #                                             verify_certs=ast.literal_eval(ES_VERIFY_CERTS),
+    #                                             ca_certs=ES_CA_CERTS,
+    #                                             username=ES_USERNAME,
+    #                                             password=ES_PASSWORD,
+    #                                             embedding_dim=int(ES_EMBEDDING_DIM),
+    #                                             index=ES_PREFIX_INDEX + type + ES_EMBEDDING_DIM)
 
     # Define Retriever
-    # retriever = EmbeddingRetriever(document_store=document_store,
-    #                                embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1") # multi-qa-mpnet-base-dot-v1 or all-mpnet-base-v2
-    retriever = DensePassageRetriever(
+    retriever1 = EmbeddingRetriever(document_store=document_store,
+                                    embedding_model=MULTI_QA_MPNET_MODEL)  # multi-qa-mpnet-base-dot-v1 or all-mpnet-base-v2
+                                    # embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1")  # multi-qa-mpnet-base-dot-v1 or all-mpnet-base-v2
+    retriever2 = DensePassageRetriever(
         document_store=document_store,
-        query_embedding_model="facebook/dpr-question_encoder-single-nq-base",
-        passage_embedding_model="facebook/dpr-ctx_encoder-single-nq-base"
+        query_embedding_model=DPR_QUESTION_MODEL,
+        passage_embedding_model=DPR_CTX_MODEL
+        # query_embedding_model="facebook/dpr-question_encoder-single-nq-base",
+        # passage_embedding_model="facebook/dpr-ctx_encoder-single-nq-base"
     )
 
     # Define Ranker
-    ranker = SentenceTransformersRanker(model_name_or_path="cross-encoder/ms-marco-MiniLM-L-12-v2")
+    ranker = SentenceTransformersRanker(model_name_or_path=MS_MARCO_MODEL)
+    # ranker = SentenceTransformersRanker(model_name_or_path="cross-encoder/ms-marco-MiniLM-L-12-v2")
 
     # Define Reader
-    reader = FARMReader(model_name_or_path="deepset/roberta-base-squad2", use_gpu=True)
+    # reader = FARMReader(model_name_or_path="deepset/roberta-base-squad2", use_gpu=True)
 
     # Create Pipeline
     query_pipeline = Pipeline()
-    query_pipeline.add_node(component=retriever, name="Retriever", inputs=["Query"])
+    query_pipeline.add_node(component=retriever2, name="Retriever", inputs=["Query"])
     query_pipeline.add_node(component=ranker, name="Ranker", inputs=["Retriever"])
-    query_pipeline.add_node(component=reader, name="Reader", inputs=["Ranker"])
+    # query_pipeline.add_node(component=reader, name="Reader", inputs=["Ranker"])
 
     # Perform Query
     top_k_retriever = N
@@ -108,7 +121,7 @@ def perform_query(query_string, N, type):
     results = query_pipeline.run(query=query_string,
                                  params={
                                      "Retriever": {"top_k": top_k_retriever},
-                                     "Reader": {"top_k": top_k_reader}
+                                     # "Reader": {"top_k": top_k_reader}
                                  })
     print("Query:", query_string)
     for row in results['documents']:
@@ -123,7 +136,7 @@ if __name__ == "__main__":
     documents = df[['Number', 'content']].to_dict(orient='records')
 
     # Define Index Name
-    index_name = 'digimon_v1'
+    index_name = 'digimon'
 
     # Perform Indexing
     create_index(documents, index_name)
