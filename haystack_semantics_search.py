@@ -44,7 +44,7 @@ def load_faiss_doc_store(db_path, faiss_index_path, faiss_config_path):
     return document_store
 
 
-def create_index(documents, type):
+def create_index(documents):
     print("Indexing Start...")
     # Define FAISS document Store
     document_store = load_faiss_doc_store(FAISS_DB_PATH, FAISS_INDEX_PATH, FAISS_CONFIG_PATH)
@@ -79,7 +79,7 @@ def create_index(documents, type):
     print("Indexing Done...")
 
 
-def perform_query(query_string, N, filters, type):
+def perform_query(query_string, N, filters):
     print("Retrieval Start...")
     # Define FAISS document Store
     document_store = load_faiss_doc_store(FAISS_DB_PATH, FAISS_INDEX_PATH, FAISS_CONFIG_PATH)
@@ -148,14 +148,11 @@ if __name__ == "__main__":
             }
         ) for data in documents_raw]
 
-    # Define Index Name
-    index_name = 'digimon'
-
     # Perform Indexing
-    # create_index(documents_final, index_name)
+    # create_index(documents_final)
 
     # Perform Searching
     filters = {
         "attribute": "fire"
     }
-    perform_query('greymon', 20, filters, index_name)
+    perform_query('greymon', 20, filters)
