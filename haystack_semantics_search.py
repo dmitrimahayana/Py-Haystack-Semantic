@@ -149,7 +149,7 @@ if __name__ == "__main__":
         ) for data in documents_raw]
 
     # Perform Indexing
-    # create_index(documents_final)
+    create_index(documents_final)
 
     # Perform Searching
     filters = {
