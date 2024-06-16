@@ -61,10 +61,10 @@ def create_index(documents):
     #                                             index=ES_PREFIX_INDEX + type + ES_EMBEDDING_DIM)
 
     # Define Retriever
-    retriever1 = EmbeddingRetriever(document_store=document_store,
-                                    embedding_model=MULTI_QA_MPNET_MODEL)  # multi-qa-mpnet-base-dot-v1 or all-mpnet-base-v2
+    # retriever1 = EmbeddingRetriever(document_store=document_store,
+    #                                 embedding_model=MULTI_QA_MPNET_MODEL)  # multi-qa-mpnet-base-dot-v1 or all-mpnet-base-v2
     # embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1")  # multi-qa-mpnet-base-dot-v1 or all-mpnet-base-v2
-    retriever2 = DensePassageRetriever(
+    retriever = DensePassageRetriever(
         document_store=document_store,
         query_embedding_model=DPR_QUESTION_MODEL,
         passage_embedding_model=DPR_CTX_MODEL
@@ -74,7 +74,7 @@ def create_index(documents):
 
     # Update Doc Embedding
     document_store.write_documents(documents)
-    document_store.update_embeddings(retriever2)
+    document_store.update_embeddings(retriever)
     document_store.save(FAISS_INDEX_PATH)  # Fais Doc Store
     print("Indexing Done...")
 
@@ -96,10 +96,10 @@ def perform_query(query_string, N, filters):
     #                                             index=ES_PREFIX_INDEX + type + ES_EMBEDDING_DIM)
 
     # Define Retriever
-    retriever1 = EmbeddingRetriever(document_store=document_store,
-                                    embedding_model=MULTI_QA_MPNET_MODEL)  # multi-qa-mpnet-base-dot-v1 or all-mpnet-base-v2
+    # retriever1 = EmbeddingRetriever(document_store=document_store,
+    #                                 embedding_model=MULTI_QA_MPNET_MODEL)  # multi-qa-mpnet-base-dot-v1 or all-mpnet-base-v2
     # embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1")  # multi-qa-mpnet-base-dot-v1 or all-mpnet-base-v2
-    retriever2 = DensePassageRetriever(
+    retriever = DensePassageRetriever(
         document_store=document_store,
         query_embedding_model=DPR_QUESTION_MODEL,
         passage_embedding_model=DPR_CTX_MODEL
@@ -113,7 +113,7 @@ def perform_query(query_string, N, filters):
 
     # Create Pipeline
     query_pipeline = Pipeline()
-    query_pipeline.add_node(component=retriever2, name="Retriever", inputs=["Query"])
+    query_pipeline.add_node(component=retriever, name="Retriever", inputs=["Query"])
     query_pipeline.add_node(component=ranker, name="Ranker", inputs=["Retriever"])
     query_pipeline.add_node(component=MetadataFilter(), name="FilterMetadata", inputs=["Ranker"])
 
